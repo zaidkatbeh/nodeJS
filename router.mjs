@@ -14,6 +14,9 @@ export default function router (request, response){
         case "login":
             new AuthController(request,response).login();
             break;
+        case "logout":
+            new AuthController(request,response).logout();
+            break;
         case "pdf" :
             response.setHeader("Content-Type","application/pdf");
             readFile("./public/pdfs/dummy.pdf",(error,fileData) => {

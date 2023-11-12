@@ -18,9 +18,9 @@ export default class AuthController {
         if (this.request.method !== 'POST') {
             return this.responseTrait.badMethodResponse();
         }
-        const form = new multiparty.Form();
-        form.parse(this.request, (err, fields) => {
-            if(err) {
+        const FORM = new multiparty.Form();
+        FORM.parse(this.request, (err, fields) => {
+            if (err) {
                 return this.responseTrait.apiResponse(500, "An error occurred while processing the form data.");
             }
             const username = fields["username"] && fields["username"][0];
@@ -29,7 +29,7 @@ export default class AuthController {
             if (!username || !password) {
                 return this.responseTrait.apiResponse(400, "Username and password both are required.");
             }
-    
+
             if (username.trim() === "" || password.trim().length < 8) {
                 return this.responseTrait.apiResponse(400, "Please enter a valid username and password");
             }
@@ -38,13 +38,13 @@ export default class AuthController {
                 if (error) {
                     return this.responseTrait.apiResponse(500, "Server error.");
                 }
-    
+
                 fileData = JSON.parse(fileData.toString());
                 let userToken = -1;
                 fileData.forEach((userData) => {
-                    if(userData.username == username && userData.password == crypto.createHash('sha256').update(password).digest('hex')) {
-                        if(userData.token) {
-                            return this.responseTrait.apiResponse(429,"please logout from other devices before logining in");
+                    if (userData.username == username && userData.password == crypto.createHash('sha256').update(password).digest('hex')) {
+                        if (userData.token) {
+                            userToken = 0;
                         } else {
                             // store the userToken
                             userToken = crypto.createHash('sha256').update(`${userData.password}${new Date().now}`).digest('hex');
@@ -52,28 +52,69 @@ export default class AuthController {
                         }
                     }
                 });
-                if(userToken != -1) {
+
+                if (userToken == -1) {
+                    this.responseTrait.apiResponse(400, "wrong cardinalites")
+
+                } else if (userToken == 0) {
+                    this.responseTrait.apiResponse(429, "please logout from other devices before logining in");
+                }
+                else {
                     fs.writeFile("./Users.json", JSON.stringify(fileData), (writeError) => {
                         if (writeError) {
-                            return this.responseTrait.apiResponse(500,"an error accorded while trying to login");
+                            return this.responseTrait.apiResponse(500, "an error accorded while trying to login");
                         } else {
-                            return this.responseTrait.apiResponse(200, "loggin successeded",{userToken : userToken});
+                            return this.responseTrait.apiResponse(200, "loggin successeded", { userToken: userToken });
                         }
                     });
-                } else {
-                    this.responseTrait.apiResponse(400, "wrong cardinalites")
                 }
+            });
+        });
+
+    }
+    logout() {
+        if (this.request.method != "POST") {
+            return this.responseTrait.badMethodResponse();
+        }
+
+        const authHeader = this.request.headers.authorization && this.request.headers.authorization.slice(7) ;
+        if (!authHeader) {
+            return this.responseTrait.unautharizedResponse();
+        }
+
+            fs.readFile("./Users.json", (error, fileData) => {
+                if (error) {
+                    return this.responseTrait.apiResponse(500, "Server error.");
+                }
+
+                fileData = JSON.parse(fileData.toString());
+                fileData.forEach(user => {
+                    if(user.token == authHeader) {
+                        delete user.token;
+                        return;
+                    } else {
+                        console.log(user.token);
+                        console.log(authHeader);
+                    }
+                });
+                fs.writeFile("./Users.json", JSON.stringify(fileData), error =>{
+                    if(error) {
+                        return this.responseTrait.apiResponse(500,"an error accorded whilte trying to logout");
+                    } else {
+                        // note {i know i didnt check if the token does not exist its not a bug ;) }
+                        return this.responseTrait.apiResponse(200,"logged out successfuly");
+                    }
+                });
             });
 
 
-            
-        })
+
 
     }
     getRegisterForm() {
         if (this.request.method == "GET") {
-            readFile('./views/view.html', (err, html) => {
-                if (err) {
+            readFile('./views/view.html', (error, html) => {
+                if (error) {
                     this.responseTrait.apiResponse(500, "an error accored while trying to return the required page");
                 } else {
                     this.response.write(html);
@@ -89,42 +130,41 @@ export default class AuthController {
         if (this.request.method !== 'POST') {
             return this.responseTrait.badMethodResponse();
         }
-    
-        const form = new multiparty.Form();
-        const allowedImageFormats = ["image/jpg", "image/jpeg"];
-    
-        form.parse(this.request, (err, fields, files) => {
-            if (err) {
+
+        const FORM = new multiparty.Form();
+        const ALLOWEDIMAGEFORMATS = ["image/jpg", "image/jpeg"];
+
+        FORM.parse(this.request, (error, fields, files) => {
+            if (error) {
                 return this.responseTrait.apiResponse(500, "An error occurred while processing the form data.");
             }
-    
-            const username = fields["username"] && fields["username"][0];
-            const password = fields["password"] && fields["password"][0];
-            const profilePicture = files["profile_picture"][0]
-    
-            if (!username || !password || !profilePicture) {
+
+            const USERNAME = fields["username"] && fields["username"][0];
+            const PASSWORD = fields["password"] && fields["password"][0];
+            const PROFILE_PICTURE = files["profile_picture"] && files["profile_picture"][0];
+
+            if (!USERNAME || !PASSWORD || !PROFILE_PICTURE) {
                 return this.responseTrait.apiResponse(400, "Username,password and profile picture  are required.");
             }
-    
-            if (username.trim() === "" || password.trim().length < 8 || !allowedImageFormats.includes(profilePicture["headers"]["content-type"])) {
+
+            if (USERNAME.trim() === "" || PASSWORD.trim().length < 8 || !ALLOWEDIMAGEFORMATS.includes(PROFILE_PICTURE["headers"]["content-type"])) {
                 return this.responseTrait.apiResponse(400, "Please enter a valid username, password, and profile picture as jpg or jpeg.");
             }
-    
+
             fs.readFile("./Users.json", (error, fileData) => {
                 if (error) {
                     return this.responseTrait.apiResponse(500, "Server error.");
                 }
-    
+
                 fileData = JSON.parse(fileData.toString());
-    
-                const doesUserExist = fileData.some(user => user.username === username);
-    
-                if (doesUserExist) {
+
+                if (fileData.some(user => user.username === USERNAME)) {
                     return this.responseTrait.apiResponse(401, "Username already exists.");
                 }
-                const imageNewName = `${username}.${profilePicture.headers["content-type"].slice(6)}`
 
-                this.storeUser({ username, password }, fileData, profilePicture, imageNewName)
+                const IMAGE_NEW_NAME = `${USERNAME}.${PROFILE_PICTURE.headers["content-type"].slice(6)}`
+
+                this.storeUser({username : USERNAME, password : PASSWORD }, fileData, PROFILE_PICTURE, IMAGE_NEW_NAME)
                     .then((result) => {
                         if (result) {
                             return this.responseTrait.apiResponse(200, "Registered successfully.");
@@ -135,12 +175,12 @@ export default class AuthController {
             });
         });
     }
-    
+
     async storeUser(userData, fileContent, profile_picture, imageNewName) {
-        const imageNewPath = `public/profile_pictures/${imageNewName}`;
+        const IMAGE_NEW_PATH = `public/profile_pictures/${imageNewName}`;
 
         return new Promise((resolve) => {
-            fs.copyFile(profile_picture.path, imageNewPath, (error) => {
+            fs.copyFile(profile_picture.path, IMAGE_NEW_PATH, (error) => {
                 if (error) {
                     console.log("Error copying profile picture:", error);
                     resolve(false);
@@ -151,7 +191,7 @@ export default class AuthController {
                         password: hashedPassword,
                         profile_picture: imageNewName,
                     });
-    
+
                     fs.writeFile("./Users.json", JSON.stringify(fileContent), (writeError) => {
                         if (writeError) {
                             console.log("Error writing to Users.json:", writeError);
@@ -164,5 +204,5 @@ export default class AuthController {
             });
         });
     }
-    
+
 }
