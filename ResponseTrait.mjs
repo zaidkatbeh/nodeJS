@@ -3,10 +3,13 @@ export default class ResponseTrait {
         this.request = request;
         this.response = response;
     }
-    apiResponse(statusCode, message) {
+    apiResponse(statusCode, message,data) {
         this.response.setHeader("Content-Type","application/json");
         this.response.statusCode = statusCode;
-        this.response.end(JSON.stringify({message:message}));
+        this.response.end(JSON.stringify({
+            message : message,
+            data : data
+        }));
     }
     badMethodResponse() {
         this.response.setHeader("Content-Type","application/json");

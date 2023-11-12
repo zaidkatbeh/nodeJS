@@ -2,8 +2,11 @@
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
+  "main": "server.mjs",
   "scripts": {
     "start": "nodemon server.mjs"
+  },
+  "dependencies": {
+    "multiparty": "^4.2.3"
   }
-  
 }
