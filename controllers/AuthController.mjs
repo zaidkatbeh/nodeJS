@@ -21,7 +21,7 @@ export default class AuthController {
         const FORM = new multiparty.Form();
         FORM.parse(this.request, (err, fields) => {
             if (err) {
-                return this.responseTrait.apiResponse(500, "An error occurred while processing the form data.");
+                return this.responseTrait.serverErrorResponse("An error occurred while processing the form data.");
             }
             const username = fields["username"] && fields["username"][0];
             const password = fields["password"] && fields["password"][0];
@@ -36,7 +36,7 @@ export default class AuthController {
 
             fs.readFile("./Users.json", (error, fileData) => {
                 if (error) {
-                    return this.responseTrait.apiResponse(500, "Server error.");
+                    return this.responseTrait.serverErrorResponse("Server error.");
                 }
 
                 fileData = JSON.parse(fileData.toString());
@@ -62,7 +62,7 @@ export default class AuthController {
                 else {
                     fs.writeFile("./Users.json", JSON.stringify(fileData), (writeError) => {
                         if (writeError) {
-                            return this.responseTrait.apiResponse(500, "an error accorded while trying to login");
+                            return this.responseTrait.serverErrorResponse("an error accorded while trying to login");
                         } else {
                             return this.responseTrait.apiResponse(200, "loggin successeded", { userToken: userToken });
                         }
@@ -84,7 +84,7 @@ export default class AuthController {
 
             fs.readFile("./Users.json", (error, fileData) => {
                 if (error) {
-                    return this.responseTrait.apiResponse(500, "Server error.");
+                    return this.responseTrait.serverErrorResponse("Server error.");
                 }
 
                 fileData = JSON.parse(fileData.toString());
@@ -99,7 +99,7 @@ export default class AuthController {
                 });
                 fs.writeFile("./Users.json", JSON.stringify(fileData), error =>{
                     if(error) {
-                        return this.responseTrait.apiResponse(500,"an error accorded whilte trying to logout");
+                        return this.responseTrait.serverErrorResponse("an error accorded whilte trying to logout");
                     } else {
                         // note {i know i didnt check if the token does not exist its not a bug ;) }
                         return this.responseTrait.apiResponse(200,"logged out successfuly");
@@ -115,7 +115,7 @@ export default class AuthController {
         if (this.request.method == "GET") {
             readFile('./views/view.html', (error, html) => {
                 if (error) {
-                    this.responseTrait.apiResponse(500, "an error accored while trying to return the required page");
+                    this.responseTrait.serverErrorResponse("an error accored while trying to return the required page");
                 } else {
                     this.response.write(html);
                     this.response.end();
@@ -136,7 +136,7 @@ export default class AuthController {
 
         FORM.parse(this.request, (error, fields, files) => {
             if (error) {
-                return this.responseTrait.apiResponse(500, "An error occurred while processing the form data.");
+                return this.responseTrait.serverErrorResponse("An error occurred while processing the form data.");
             }
 
             const USERNAME = fields["username"] && fields["username"][0];
@@ -153,7 +153,7 @@ export default class AuthController {
 
             fs.readFile("./Users.json", (error, fileData) => {
                 if (error) {
-                    return this.responseTrait.apiResponse(500, "Server error.");
+                    return this.responseTrait.serverErrorResponse("Server error.");
                 }
 
                 fileData = JSON.parse(fileData.toString());
@@ -169,7 +169,7 @@ export default class AuthController {
                         if (result) {
                             return this.responseTrait.apiResponse(200, "Registered successfully.");
                         } else {
-                            return this.responseTrait.apiResponse(500, "An error occurred while trying to save the user.");
+                            return this.responseTrait.serverErrorResponse("An error occurred while trying to save the user.");
                         }
                     });
             });

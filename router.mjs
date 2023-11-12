@@ -21,7 +21,7 @@ export default function router (request, response){
             response.setHeader("Content-Type","application/pdf");
             readFile("./public/pdfs/dummy.pdf",(error,fileData) => {
                 if(error) {
-                    return responseTrait.apiResponse(500,"an error accorded while trying to read the file");
+                    return responseTrait.serverErrorResponse("an error accorded while trying to read the file");
                 } else {
                     response.statusCode = 200;
                     response.setHeader("Content-Type","text/html");

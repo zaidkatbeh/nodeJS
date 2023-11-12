@@ -17,4 +17,8 @@ export default class ResponseTrait {
     unautharizedResponse() {
         this.apiResponse(401,"unautharized");
     }
+    serverErrorResponse(message) {
+        this.apiResponse(500,message);
+
+    }
 }
