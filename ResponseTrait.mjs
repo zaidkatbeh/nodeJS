@@ -12,7 +12,9 @@ export default class ResponseTrait {
         }));
     }
     badMethodResponse() {
-        this.response.setHeader("Content-Type","application/json");
         this.apiResponse(405,"this method is not allowed");
+    }
+    unautharized() {
+        this.apiResponse(401,"unautharized");
     }
 }
