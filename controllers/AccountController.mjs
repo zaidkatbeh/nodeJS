@@ -41,23 +41,23 @@ export default class AccountController {
                 }
 
                 fileData = JSON.parse(fileData.toString());
-                let userToken = -1;
+                let isTokenValid = -1;
                 fileData.forEach((userData) => {
                     if (userData.username == username && userData.password == crypto.createHash('sha256').update(password).digest('hex')) {
                         if (userData.token) {
-                            userToken = 0;
+                            isTokenValid = 0;
                         } else {
                             // store the userToken
-                            userToken = crypto.createHash('sha256').update(`${userData.password}${new Date().now}`).digest('hex');
-                            userData.token = userToken;
+                            isTokenValid = crypto.createHash('sha256').update(`${userData.password}${new Date().now}`).digest('hex');
+                            userData.token = isTokenValid;
                         }
                     }
                 });
 
-                if (userToken == -1) {
+                if (isTokenValid == -1) {
                     this.responseTrait.apiResponse(400, "wrong cardinalites")
 
-                } else if (userToken == 0) {
+                } else if (isTokenValid == 0) {
                     this.responseTrait.apiResponse(429, "please logout from other devices before logining in");
                 }
                 else {
@@ -65,7 +65,7 @@ export default class AccountController {
                         if (writeError) {
                             return this.responseTrait.serverErrorResponse("an error accorded while trying to login");
                         } else {
-                            return this.responseTrait.apiResponse(200, "loggin successeded", { userToken: userToken });
+                            return this.responseTrait.apiResponse(200, "loggin successeded", { userToken: isTokenValid });
                         }
                     });
                 }
