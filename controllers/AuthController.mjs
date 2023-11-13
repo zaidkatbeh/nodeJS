@@ -4,9 +4,7 @@ import fs from "fs";
 
 import crypto from "crypto";
 
-import multiparty from "multiparty"
-import AuthMiddleware from "../middlewares/AuthMiddleware.mjs";
-
+import multiparty from "multiparty";
 
 export default class AuthController {
     constructor(request, response) {

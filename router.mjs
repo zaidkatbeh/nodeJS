@@ -1,5 +1,6 @@
 import AccountController from "./controllers/AccountController.mjs";
 import AuthController from "./controllers/AuthController.mjs";
+import AuthMiddleware from "./middlewares/AuthMiddleware.mjs";
 import ResponseTrait from './responseTrait.mjs';
 
 export default function router (request, response){
@@ -22,8 +23,14 @@ export default function router (request, response){
             break;
 
         case "edit":
-            new AccountController(request,response).edit();
+            AuthMiddleware(request, response, (error) => {
+                if (error != "null") {
+                    new AccountController(request,response).edit();
+                }
+            });
             break;
+        
+        case "users" :
 
         case "pdf" :
             response.setHeader("Content-Type","application/pdf");
