@@ -5,9 +5,10 @@ import fs from "fs";
 import crypto from "crypto";
 
 import multiparty from "multiparty"
+import AuthMiddleware from "../middlewares/AuthMiddleware.mjs";
 
 
-export default class AuthController {
+export default class AccountController {
     constructor(request, response) {
         this.request = request;
         this.response = response;
@@ -72,12 +73,13 @@ export default class AuthController {
         });
 
     }
+
     logout() {
         if (this.request.method != "POST") {
             return this.responseTrait.badMethodResponse();
         }
 
-        const authHeader = this.request.headers.authorization && this.request.headers.authorization.slice(7) ;
+        const authHeader = this.request.headers.authorization && this.request.headers.authorization.slice(7);
         if (!authHeader) {
             return this.responseTrait.unautharizedResponse();
         }
@@ -97,20 +99,18 @@ export default class AuthController {
                         console.log(authHeader);
                     }
                 });
+
                 fs.writeFile("./Users.json", JSON.stringify(fileData), error =>{
                     if(error) {
                         return this.responseTrait.serverErrorResponse("an error accorded whilte trying to logout");
                     } else {
-                        // note {i know i didnt check if the token does not exist its not a bug ;) }
+                        // note {i know i didnt check if the token does not exist, its not a bug ;) }
                         return this.responseTrait.apiResponse(200,"logged out successfuly");
                     }
                 });
             });
-
-
-
-
     }
+
     getRegisterForm() {
         if (this.request.method == "GET") {
             readFile('./views/view.html', (error, html) => {
@@ -123,6 +123,14 @@ export default class AuthController {
             });
         } else {
             this.responseTrait.badMethodResponse();
+        }
+    }
+
+    async edit() {
+        if((await AuthMiddleware(this.request, this.response)) != undefined) {
+            console.log(this.request.user);
+            console.log("-".repeat(20));
+            return this.responseTrait.apiResponse(200,"",this.request.user?"hi":"not hi")
         }
     }
 
@@ -204,5 +212,4 @@ export default class AuthController {
             });
         });
     }
-
 }

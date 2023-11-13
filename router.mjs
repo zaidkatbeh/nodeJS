@@ -1,21 +1,24 @@
-import AuthController from "./controllers/authController.mjs";
+import AccountController from "./controllers/AccountController.mjs";
 import ResponseTrait from './responseTrait.mjs';
 
 export default function router (request, response){
     const responseTrait = new ResponseTrait(request, response);
     switch (request.url.slice(1)) {
         case "registerForm" :
-            new AuthController(request,response).getRegisterForm();
+            new AccountController(request,response).getRegisterForm();
             break;
 
         case "register":
-            new AuthController(request,response).register();
+            new AccountController(request,response).register();
             break;
         case "login":
-            new AuthController(request,response).login();
+            new AccountController(request,response).login();
             break;
         case "logout":
-            new AuthController(request,response).logout();
+            new AccountController(request,response).logout();
+            break;
+        case "edit":
+            new AccountController(request,response).edit();
             break;
         case "pdf" :
             response.setHeader("Content-Type","application/pdf");
