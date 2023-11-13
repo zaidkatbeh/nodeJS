@@ -1,25 +1,30 @@
 import AccountController from "./controllers/AccountController.mjs";
+import AuthController from "./controllers/AuthController.mjs";
 import ResponseTrait from './responseTrait.mjs';
 
 export default function router (request, response){
     const responseTrait = new ResponseTrait(request, response);
     switch (request.url.slice(1)) {
         case "registerForm" :
-            new AccountController(request,response).getRegisterForm();
+            new AuthController(request,response).getRegisterForm();
             break;
 
         case "register":
-            new AccountController(request,response).register();
+            new AuthController(request,response).register();
             break;
+
         case "login":
-            new AccountController(request,response).login();
+            new AuthController(request,response).login();
             break;
+
         case "logout":
-            new AccountController(request,response).logout();
+            new AuthController(request,response).logout();
             break;
+
         case "edit":
             new AccountController(request,response).edit();
             break;
+
         case "pdf" :
             response.setHeader("Content-Type","application/pdf");
             readFile("./public/pdfs/dummy.pdf",(error,fileData) => {
@@ -47,6 +52,7 @@ export default function router (request, response){
                 }
             });
             break;
+            
         default :
         responseTrait.apiResponse(404,"not found !");
     }
