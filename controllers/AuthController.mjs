@@ -130,7 +130,7 @@ export default class AuthController {
         }
 
         const FORM = new multiparty.Form();
-        const ALLOWEDIMAGEFORMATS = ["image/jpg", "image/jpeg"];
+        const ALLOWEDIMAGEFORMATS = ["image/jpg", "image/jpeg", "image/png"];
 
         FORM.parse(this.request, (error, fields, files) => {
             if (error) {

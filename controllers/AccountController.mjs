@@ -17,6 +17,7 @@ export default class AccountController {
         if (this.request.method !== 'POST') {
             return this.responseTrait.badMethodResponse();
         }
+
         const FORM = new multiparty.Form();
         FORM.parse(this.request, (err, fields, files) => {
             if (err) {
@@ -24,8 +25,10 @@ export default class AccountController {
             }
 
             const PROFILE_PICTURE = files["profile_picture"] && files["profile_picture"][0];
-            if(!PROFILE_PICTURE ) {
-                return this.responseTrait.apiResponse(400,"please submit some data");
+            const ALLOWEDIMAGEFORMATS = ["image/jpg", "image/jpeg", "image/png"];
+
+            if(!PROFILE_PICTURE || !ALLOWEDIMAGEFORMATS.includes(PROFILE_PICTURE["headers"]["content-type"])) {
+                return this.responseTrait.apiResponse(400,"please submit a valid image",);
             }
             readFile("./Users.json", (error, users) => {
                 if(error) {
@@ -37,6 +40,7 @@ export default class AccountController {
                 if(PROFILE_PICTURE) {
                     fs.unlink(`public/profile_pictures/${this.request.user["profile_picture"]}`,(error) => {
                         if(error) {
+                            console.log(error);
                             return this.responseTrait.serverErrorResponse("an error accorded please try again later");
                         }
 
@@ -49,6 +53,12 @@ export default class AccountController {
                                     user.profile_picture = IMAGE_NEW_NAME;
                                 }
                             });
+                            fs.writeFile("Users.mjs", JSON.stringify(users), (error => {
+                                if(error) {
+                                    return this.responseTrait.serverErrorResponse("an error accorded while storing the edits please try again later");
+                                }
+
+                            }))
                             return this.responseTrait.apiResponse(200,"user edited successfuly");
                         })
                     });
