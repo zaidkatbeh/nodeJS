@@ -70,7 +70,7 @@ export default function router (request, response){
                 }
             });
             break;
-            
+
         default :
         responseTrait.apiResponse(404,"not found !");
     }

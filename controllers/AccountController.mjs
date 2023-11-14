@@ -30,6 +30,7 @@ export default class AccountController {
             if(!PROFILE_PICTURE || !ALLOWEDIMAGEFORMATS.includes(PROFILE_PICTURE["headers"]["content-type"])) {
                 return this.responseTrait.apiResponse(400,"please submit a valid image",);
             }
+
             readFile("./Users.json", (error, users) => {
                 if(error) {
                     return this.responseTrait.serverErrorResponse("an error accorded while geting the user info");
@@ -53,7 +54,7 @@ export default class AccountController {
                                     user.profile_picture = IMAGE_NEW_NAME;
                                 }
                             });
-                            fs.writeFile("Users.mjs", JSON.stringify(users), (error => {
+                            fs.writeFile("Users.json", JSON.stringify(users), (error => {
                                 if(error) {
                                     return this.responseTrait.serverErrorResponse("an error accorded while storing the edits please try again later");
                                 }
