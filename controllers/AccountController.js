@@ -1,6 +1,6 @@
 import ResponseTrait from "../responseTrait.mjs";
 
-import AuthMiddleware from "../middlewares/AuthMiddleware.mjs";
+import AuthMiddleware from "../middlewares/AuthMiddleware.js";
 
 import multiparty from "multiparty";
 

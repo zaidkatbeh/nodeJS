@@ -1,10 +1,10 @@
-import AccountController from "./controllers/AccountController.mjs";
+import AccountController from "./controllers/AccountController.js";
 
-import AuthController from "./controllers/AuthController.mjs";
+import AuthController from "./controllers/AuthController.js";
 
-import UsersController from "./controllers/UsersController.mjs";
+import UsersController from "./controllers/UsersController.js";
 
-import AuthMiddleware from "./middlewares/AuthMiddleware.mjs";
+import AuthMiddleware from "./middlewares/AuthMiddleware.js";
 
 import ResponseTrait from './responseTrait.mjs';
 
