@@ -3,7 +3,7 @@ import ResponseTrait from "../responseTrait.mjs";
 export default async function  AuthMiddleware (request, response, callback){
     const authToken = request.headers.authorization && request.headers.authorization.slice(7);
     if(!authToken) {
-        new ResponseTrait(request, response).unautharizedResponse();
+        return new ResponseTrait(request, response).unautharizedResponse();
         callback(new Error("unautharized error"));
     }
         readFile("./Users.json", (error, fileData) => {
@@ -13,9 +13,9 @@ export default async function  AuthMiddleware (request, response, callback){
             }
     
             fileData = JSON.parse(fileData.toString());
-            const USER = fileData.find(async (user) => user.token == authToken);
-            if(USER == -1) {
-                new ResponseTrait(request, response).unautharizedResponse();
+            const USER = fileData.find((user) => user.token === authToken);
+            if(USER == undefined) {
+                return new ResponseTrait(request, response).unautharizedResponse();
                 callback(new Error("unautharized error"));
             } else {
                 request.user = USER;

@@ -5,6 +5,7 @@ import AuthController from "./controllers/AuthController.js";
 import UsersController from "./controllers/UsersController.js";
 
 import AuthMiddleware from "./middlewares/AuthMiddleware.js";
+import getFormBodyMiddleware from "./middlewares/getFormBodyMiddleware.js";
 
 import ResponseTrait from './responseTrait.mjs';
 
@@ -20,7 +21,11 @@ export default function router (request, response){
             break;
 
         case "login":
-            new AuthController(request,response).login();
+            getFormBodyMiddleware(request, error => {
+                if(error == null) {
+                    new AuthController(request,response).login()
+                }
+            });
             break;
 
         case "logout":
