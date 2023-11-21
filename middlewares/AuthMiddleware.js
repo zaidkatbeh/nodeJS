@@ -1,4 +1,4 @@
-import ResponseTrait from "../responseTrait.mjs";
+import ResponseTrait from "../responseTrait.js";
 
 export default async function  AuthMiddleware (request, response, callback){
     const authToken = request.headers.authorization && request.headers.authorization.slice(7);

@@ -7,7 +7,7 @@ import UsersController from "./controllers/UsersController.js";
 import AuthMiddleware from "./middlewares/AuthMiddleware.js";
 import getFormBodyMiddleware from "./middlewares/getFormBodyMiddleware.js";
 
-import ResponseTrait from './responseTrait.mjs';
+import ResponseTrait from './responseTrait.js';
 
 export default function router (request, response){
     const responseTrait = new ResponseTrait(request, response);
@@ -17,19 +17,27 @@ export default function router (request, response){
             break;
 
         case "register":
-            new AuthController(request,response).register();
+            getFormBodyMiddleware(request, error => {
+                if (error == null) {
+                    new AuthController(request,response).register();
+                }
+            });
             break;
 
         case "login":
             getFormBodyMiddleware(request, error => {
-                if(error == null) {
+                if (error == null) {
                     new AuthController(request,response).login()
                 }
             });
             break;
 
         case "logout":
-            new AuthController(request,response).logout();
+            AuthMiddleware(request, response, (error) => {
+                if (error == null) {
+                    new AuthController(request,response).logout();
+                }
+            });
             break;
 
         case "edit":

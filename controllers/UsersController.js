@@ -1,4 +1,4 @@
-import ResponseTrait from "../responseTrait.mjs";
+import ResponseTrait from "../responseTrait.js";
 
 import fs from "fs";
 

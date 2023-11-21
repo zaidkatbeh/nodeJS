@@ -1,10 +1,8 @@
-import ResponseTrait from "../responseTrait.mjs";
+import ResponseTrait from "../responseTrait.js";
 
 import fs from "fs";
 
 import crypto from "crypto";
-
-import multiparty from "multiparty";
 
 import User from "../models/User.js";
 
@@ -30,7 +28,7 @@ export default class AuthController {
         if (username.trim() === "" || password.trim().length < 8) {
             return this.responseTrait.apiResponse(400, "Please enter a valid username and password");
         }
-        
+
         new Promise(async (resolve) => {
             let users = await User.getUsers();
             resolve(users);
@@ -39,7 +37,7 @@ export default class AuthController {
                 if (userData.username == username && userData.password == crypto.createHash('sha256').update(password).digest('hex')) {
                     if (userData.token) {
                         console.log("please logout from other devices before logining in");
-                        throw Error("please logout from other devices before logining in");
+                        throw new Error("please logout from other devices before logining in");
                     } else {
                         // store the userToken
                         let userToken = crypto.createHash('sha256').update(`${userData.password}${new Date().now}`).digest('hex');
@@ -48,54 +46,35 @@ export default class AuthController {
                     }
                 }
             }
-
-            throw Error("wrong cardinalites");
+            throw new Error("wrong cardinalites");
         }).then(([usersAfterUpdate, authToken]) => {
             User.writeUsers(usersAfterUpdate);
-            return(authToken);
+            return (authToken);
         }).then((authToken) => {
-            this.responseTrait.apiResponse(200, "loggin successeded", {"Auth token": authToken});
+            this.responseTrait.apiResponse(200, "loggin successeded", { "Auth token": authToken });
         }).catch(error => {
             console.log(error);
             this.responseTrait.serverErrorResponse(error.message)
         });
     }
 
-    logout() {
+    async logout() {
         if (this.request.method != "POST") {
             return this.responseTrait.badMethodResponse();
         }
-
-        const authHeader = this.request.headers.authorization && this.request.headers.authorization.slice(7);
-        if (!authHeader) {
-            return this.responseTrait.unautharizedResponse();
-        }
-
-        fs.readFile("./Users.json", (error, fileData) => {
-            if (error) {
-                return this.responseTrait.serverErrorResponse("Server error.");
-            }
-
-            fileData = JSON.parse(fileData.toString());
-            fileData.forEach(user => {
-                if (user.token == authHeader) {
+        try {
+            const USERS = await User.getUsers();
+            USERS.forEach(user => {
+                if (user.token == this.request.user.token) {
                     delete user.token;
                     return;
-                } else {
-                    console.log(user.token);
-                    console.log(authHeader);
                 }
             });
-
-            fs.writeFile("./Users.json", JSON.stringify(fileData), error => {
-                if (error) {
-                    return this.responseTrait.serverErrorResponse("an error accorded whilte trying to logout");
-                } else {
-                    // note {i know i didnt check if the token does not exist, its not a bug ;) }
-                    return this.responseTrait.apiResponse(200, "logged out successfuly");
-                }
-            });
-        });
+            await User.writeUsers(USERS);
+            this.responseTrait.apiResponse(200, "logged out successfuly")
+        } catch (error) {
+            this.responseTrait.serverErrorResponse(error.message)
+        }
     }
 
     getRegisterForm() {
@@ -113,82 +92,48 @@ export default class AuthController {
         }
     }
 
-    register() {
+    async register() {
         if (this.request.method !== 'POST') {
             return this.responseTrait.badMethodResponse();
         }
 
-        const FORM = new multiparty.Form();
         const ALLOWEDIMAGEFORMATS = ["image/jpg", "image/jpeg", "image/png"];
+        const USERNAME = this.request.fields["username"] && this.request.fields["username"][0];
+        const PASSWORD = this.request.fields["password"] && this.request.fields["password"][0];
+        const PROFILE_PICTURE = this.request.files["profile_picture"] && this.request.files["profile_picture"][0];
 
-        FORM.parse(this.request, (error, fields, files) => {
-            if (error) {
-                return this.responseTrait.serverErrorResponse("An error occurred while processing the form data.");
+        if (!USERNAME || !PASSWORD || !PROFILE_PICTURE) {
+            return this.responseTrait.apiResponse(400, "Username,password and profile picture  are required.");
+        }
+
+        if (USERNAME.trim() === "" || PASSWORD.trim().length < 8 || !ALLOWEDIMAGEFORMATS.includes(PROFILE_PICTURE["headers"]["content-type"])) {
+            return this.responseTrait.apiResponse(400, "Please enter a valid username, password, and profile picture as jpg or jpeg.");
+        }
+        try {
+            const USERS = await User.getUsers();
+            if (USERS.some(user => user.username === USERNAME)) {
+                return this.responseTrait.apiResponse(401, "Username already exists.");
             }
 
-            const USERNAME = fields["username"] && fields["username"][0];
-            const PASSWORD = fields["password"] && fields["password"][0];
-            const PROFILE_PICTURE = files["profile_picture"] && files["profile_picture"][0];
+            const IMAGE_NEW_NAME = `${USERNAME}.${PROFILE_PICTURE.headers["content-type"].slice(6)}`
+            const IMAGE_NEW_PATH = `public/profile_pictures/${IMAGE_NEW_NAME}`;
 
-            if (!USERNAME || !PASSWORD || !PROFILE_PICTURE) {
-                return this.responseTrait.apiResponse(400, "Username,password and profile picture  are required.");
-            }
-
-            if (USERNAME.trim() === "" || PASSWORD.trim().length < 8 || !ALLOWEDIMAGEFORMATS.includes(PROFILE_PICTURE["headers"]["content-type"])) {
-                return this.responseTrait.apiResponse(400, "Please enter a valid username, password, and profile picture as jpg or jpeg.");
-            }
-
-            fs.readFile("./Users.json", (error, fileData) => {
-                if (error) {
-                    return this.responseTrait.serverErrorResponse("Server error.");
-                }
-
-                fileData = JSON.parse(fileData.toString());
-
-                if (fileData.some(user => user.username === USERNAME)) {
-                    return this.responseTrait.apiResponse(401, "Username already exists.");
-                }
-
-                const IMAGE_NEW_NAME = `${USERNAME}.${PROFILE_PICTURE.headers["content-type"].slice(6)}`
-
-                this.storeUser({ username: USERNAME, password: PASSWORD }, fileData, PROFILE_PICTURE, IMAGE_NEW_NAME)
-                    .then((result) => {
-                        if (result) {
-                            return this.responseTrait.apiResponse(200, "Registered successfully.");
-                        } else {
-                            return this.responseTrait.serverErrorResponse("An error occurred while trying to save the user.");
-                        }
-                    });
-            });
-        });
-    }
-
-    async storeUser(userData, fileContent, profile_picture, imageNewName) {
-        const IMAGE_NEW_PATH = `public/profile_pictures/${imageNewName}`;
-
-        return new Promise((resolve) => {
-            fs.copyFile(profile_picture.path, IMAGE_NEW_PATH, (error) => {
+            fs.copyFile(PROFILE_PICTURE.path, IMAGE_NEW_PATH, (error) => {
                 if (error) {
                     console.log("Error copying profile picture:", error);
-                    resolve(false);
+                    throw new Error("an error accorded while trying to save your image")
                 } else {
-                    const hashedPassword = crypto.createHash('sha256').update(userData.password).digest('hex');
-                    fileContent.push({
-                        username: userData.username,
+                    const hashedPassword = crypto.createHash('sha256').update(PASSWORD).digest('hex');
+                    USERS.push({
+                        username: USERNAME,
                         password: hashedPassword,
-                        profile_picture: imageNewName,
+                        profile_picture: IMAGE_NEW_NAME,
                     });
-
-                    fs.writeFile("./Users.json", JSON.stringify(fileContent), (writeError) => {
-                        if (writeError) {
-                            console.log("Error writing to Users.json:", writeError);
-                            resolve(false);
-                        } else {
-                            resolve(true);
-                        }
-                    });
+                    User.writeUsers(USERS);
                 }
             });
-        });
+        } catch (error) {
+            this.responseTrait.badMethodResponse(error)
+        }
     }
 }
