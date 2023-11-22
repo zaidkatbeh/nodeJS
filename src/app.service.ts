@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+// import { Injectable } from '@nestjs/common';
 
-@Injectable({})
 export class AppService {
+  counter = 5;
   getHello(): string {
     return 'Hello World!';
   }

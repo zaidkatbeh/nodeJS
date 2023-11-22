@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Res,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { CategoriesService } from './categories.service';
@@ -30,7 +31,7 @@ export class CategoriesController {
 
   @Get(':id')
   findOne(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: string,
     @Res({ passthrough: true }) response: Response,
   ) {
     const category = this.categoriesService.findOne(+id);
