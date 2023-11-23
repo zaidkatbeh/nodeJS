@@ -9,14 +9,14 @@ import { List } from './list/entities/list.entity';
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
-      port: 3000,
+      port: 3306,
       username: 'root',
       password: '',
       database: 'to_do_using_nestJS',
       entities: [
-        List
+        'dist/**/*.entity.js',
       ],
-      migrations: [],
+      migrations: ['dist/migrations/*.js'],
       synchronize: true,
       migrationsTableName: 'migration',
     }),

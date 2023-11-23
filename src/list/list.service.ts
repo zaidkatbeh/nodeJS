@@ -28,6 +28,6 @@ export class ListService {
   }
 
   async remove(id: number): Promise<void>{
-    await this.listRepositry.remove({id: id});
+    // await this.listRepositry.remove({id});
   }
 }
