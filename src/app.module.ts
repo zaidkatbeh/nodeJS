@@ -1,10 +1,12 @@
+/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
-import { ListModule } from './list/list.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { List } from './list/entities/list.entity';
 import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
+import { ListModule } from './list/list.module';
 import { TaskModule } from './task/task.module';
+import { User } from './user/entities/user.entity';
+import { List } from './list/entities/list.entity';
+import { Task } from './task/entities/task.entity';
 
 @Module({
   imports: [
@@ -19,8 +21,10 @@ import { TaskModule } from './task/task.module';
       entities: [
         List,
         User,
+        Task,
       ],
-      synchronize: true,
+      // synchronize: true,
+      // dropSchema: true,
     }),
     UserModule,
     TaskModule,
@@ -28,4 +32,4 @@ import { TaskModule } from './task/task.module';
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule { }
