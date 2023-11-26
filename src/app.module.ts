@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { ListModule } from './list/list.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { List } from './list/entities/list.entity';
+import { UserModule } from './user/user.module';
+import { User } from './user/entities/user.entity';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -14,12 +17,13 @@ import { List } from './list/entities/list.entity';
       password: '',
       database: 'to_do_using_nestJS',
       entities: [
-        'dist/**/*.entity.js',
+        List,
+        User,
       ],
-      migrations: ['dist/migrations/*.js'],
       synchronize: true,
-      migrationsTableName: 'migration',
     }),
+    UserModule,
+    TaskModule,
   ],
   controllers: [],
   providers: [],
