@@ -1,7 +1,9 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import Category from 'src/interfaces/Category.interface';
+import { File } from 'buffer';
 
 @Injectable()
 export class CategoriesService {
@@ -16,6 +18,7 @@ export class CategoriesService {
       id: this.categories[this.categories.length - 1].id + 1,
       ...createCategoryDto,
     };
+    // createCategoryDto.category_picture.
     this.categories.push(category);
   }
 
