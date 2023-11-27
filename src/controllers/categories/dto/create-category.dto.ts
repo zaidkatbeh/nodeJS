@@ -2,6 +2,7 @@
 import { IsString, Length, ValidationArguments } from "class-validator";
 
 export class CreateCategoryDto {
+  category_picture: string;
   @IsString()
   @Length(3, 10, {
     message: (arrgs: ValidationArguments): string => {
@@ -12,8 +13,8 @@ export class CreateCategoryDto {
       }
     }
   })
+
   name: string;
 
-  @IsString()
-  test:string;
+
 }

@@ -1,1 +1,12 @@
-export class Category {}
+/* eslint-disable prettier/prettier */
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
+@Entity()
+export class Category {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({length: 50})
+  name: string;
+  
+}

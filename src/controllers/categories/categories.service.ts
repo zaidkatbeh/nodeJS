@@ -3,22 +3,15 @@ import { Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import Category from 'src/interfaces/Category.interface';
-import { File } from 'buffer';
 
 @Injectable()
 export class CategoriesService {
-  categories: Category[] = [
-    {
-      id: 1,
-      name: 'food',
-    },
-  ];
+  categories: Category[] = [];
   create(createCategoryDto: CreateCategoryDto) {
     const category: Category = {
-      id: this.categories[this.categories.length - 1].id + 1,
+      id: this.categories[this.categories.length - 1]?.id + 1 ?? 1,
       ...createCategoryDto,
     };
-    // createCategoryDto.category_picture.
     this.categories.push(category);
   }
 
