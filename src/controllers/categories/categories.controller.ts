@@ -18,30 +18,37 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 import { FileValidationPipe } from 'src/pipes/file-validation/file-validation.pipe';
-import { appendFile, copyFile } from 'fs/promises';
-import { File } from 'buffer';
-import { writeFile } from 'fs';
-import { FILE } from 'dns';
 
 @Controller('categories')
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('category_picture'))
-  create(
+  @UseInterceptors(FileInterceptor('category_picture',{
+    // fileFilter(req, file, callback) {
+    //   const allowedMiME = ['image/png', 'image/jpeg', 'image/jpg'];
+    //   if (allowedMiME.includes(file.mimetype) && file.size <= 1024 * 1024 * 8) {
+    //     callback(null, true);
+    //   } else {
+    //     callback (null, false);
+    //   }
+    // },
+    storage: diskStorage({
+      destination: `src/public/categoryImages/`,
+      filename(req, file, callback) {
+        const [fileName,fileMime] = file.originalname.split(".");
+        const newFileName = `${fileName}${Date.now()}.${fileMime}`;
+        callback(null, newFileName);
+      }, 
+    }),
+  }))
+    create(
     @Body() createCategoryDto: CreateCategoryDto,
-
-    @UploadedFile(new FileValidationPipe(5000,['image/png'])) category_picture: Express.Multer.File
+    @UploadedFile(new FileValidationPipe(5000,['image/png','image/jpeg', 'image/jpg'])) category_picture: Express.Multer.File
     ): string {
-      createCategoryDto.category_picture = category_picture;
-      // appendFile("/public/test.png",category_picture.buffer);
-      // writeFile("./public/test.png",category_picture.buffer,()=>{});
-      // copyFile(,"public/test.png");
-      file
     this.categoriesService.create(createCategoryDto);
-
     return 'category added successfuly';
   }
 

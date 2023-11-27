@@ -21,7 +21,7 @@ export class FileValidationPipe implements PipeTransform {
     } else if (!this.AllowedMime.includes(value.mimetype)) {
       const allowedmime = this.AllowedMime.join(' ').replaceAll('image/', '');
       throw new BadRequestException(
-        `MIME not allowed allower MIME are ${allowedmime}`,
+        `MIME not allowed allowed MIME are ${allowedmime}`,
       );
     } else {
       return value;
