@@ -11,8 +11,11 @@ export class ListService {
     @InjectRepository(List)
     private listRepositry: Repository<List>
     ){}
-  create(createListDto: CreateListDto) {
-    return 'This action adds a new list';
+  async create(createListDto: CreateListDto): Promise<List>{
+    const newList = this.listRepositry.create({
+      name: createListDto.name,
+    });
+    return this.listRepositry.save(newList)
   }
 
   findAll(): Promise<List[]>{
@@ -28,6 +31,6 @@ export class ListService {
   }
 
   async remove(id: number): Promise<void>{
-    // await this.listRepositry.remove({id});
+    await this.listRepositry.delete(id);
   }
 }

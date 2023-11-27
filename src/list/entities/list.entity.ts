@@ -13,17 +13,18 @@ import {
 export class List {
   @PrimaryGeneratedColumn()
   id: number;
+
   @Column({
     unique: true,
     length: 50,
   })
   name: string;
 
-  @OneToMany(()=>Task, (task) => task.list, {
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE',
-  })
-  tasks: Task[];
+  // @OneToMany(()=>Task, (task) => task.list, {
+  //   onDelete: 'CASCADE',
+  //   onUpdate: 'CASCADE',
+  // })
+  // tasks: Task[];
 
   @CreateDateColumn()
   created_at: string;

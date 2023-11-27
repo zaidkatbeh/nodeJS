@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { 
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  BadRequestException
+ } from '@nestjs/common';
 import { ListService } from './list.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
@@ -8,8 +17,14 @@ export class ListController {
   constructor(private readonly listService: ListService) {}
 
   @Post()
-  create(@Body() createListDto: CreateListDto) {
-    return this.listService.create(createListDto);
+  async create(@Body() createListDto: CreateListDto) {
+    return this.listService.create(createListDto)
+    .then(() => {
+      return  "list saved successufly"
+    })
+    .catch((error) => {
+      throw new BadRequestException("name is used");
+    })
   }
 
   @Get()

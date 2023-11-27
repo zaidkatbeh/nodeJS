@@ -17,8 +17,8 @@ export class Task {
   @Column()
   name: string;
 
-  @ManyToOne(() => List, (list) => list.tasks)
-  list: List;
+  // @ManyToOne(() => List, (list) => list.tasks)
+  // list: List;
 
   @CreateDateColumn()
   created_at: string;
