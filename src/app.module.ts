@@ -6,6 +6,7 @@ import { CategoriesModule } from './controllers/categories/categories.module';
 import { UserModule } from './controllers/user/user.module';
 import { DenythisMiddleware } from './middlewares/denythis/denythis.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { Category } from './controllers/categories/entities/category.entity';
 
 @Module({
   imports: [
@@ -18,7 +19,9 @@ import { TypeOrmModule } from '@nestjs/typeorm'
       database: 'test',
       username: 'root',
       password: '',
-      entities: [],
+      entities: [
+        Category
+      ],
       synchronize: true
     }),
     ],
