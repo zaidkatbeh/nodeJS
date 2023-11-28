@@ -40,7 +40,7 @@ export class ListService {
     } else {
       list.name = updateListDto.name;
       await this.listRepositry.save(list);
-      return "list updated successfuly"
+      return "list updated successfuly";
     }
   }
 
